@@ -1,21 +1,25 @@
 package com.tagtraum.perf.gcviewer;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.tagtraum.perf.gcviewer.ctrl.GCViewerGuiController;
 import com.tagtraum.perf.gcviewer.exp.DataWriter;
 import com.tagtraum.perf.gcviewer.exp.DataWriterType;
 import com.tagtraum.perf.gcviewer.exp.impl.DataWriterFactory;
 import com.tagtraum.perf.gcviewer.imp.DataReaderException;
 import com.tagtraum.perf.gcviewer.imp.DataReaderFacade;
 import com.tagtraum.perf.gcviewer.model.GCModel;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.tagtraum.perf.gcviewer.model.GCResource;
+import com.tagtraum.perf.gcviewer.view.SimpleChartRenderer;
 
 public class GCViewer {
     private static final Logger LOGGER = Logger.getLogger(GCViewer.class.getName());
 
-	public static void main(final String[] args) {
+	public static void main(final String[] args) throws InvocationTargetException, InterruptedException {
         if (args.length > 3) {
             usage();
         }
@@ -35,14 +39,15 @@ public class GCViewer {
             }
         }
         else {
-        	GCViewerGui.start(args.length == 1 ? args[0] : null);
+            new GCViewerGuiController().startGui(args.length == 1 ? args[0] : null);
         }
     }
 
     private static void export(String gcFilename, String summaryFilePath, String chartFilePath)
             throws IOException, DataReaderException {
+        
         final DataReaderFacade dataReaderFacade = new DataReaderFacade();
-        GCModel model = dataReaderFacade.loadModel(gcFilename);
+        GCModel model = dataReaderFacade.loadModel(new GCResource(gcFilename));
 
         exportSummary(model, summaryFilePath);
         if (chartFilePath != null)
@@ -67,5 +72,5 @@ public class GCViewer {
         System.out.println("java -jar gcviewer.jar [<gc-log-file>] [<export.csv>] [<chart.png>] " +
                 "-> cmdline: writes report to <export.csv> and renders gc chart to <chart.png>");
     }
-
+	
 }
